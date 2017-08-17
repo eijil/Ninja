@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="yes" name="apple-touch-fullscreen" />
+  <meta content="telephone=no,email=no" name="format-detection" />
+  <title>Ninja</title>
+
+  <!-- build:css main.min.css -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/normalize-css/normalize.css">
+
+  <!-- /build -->
+</head>
+
+<body>
+
+  <div id="Ninja-game" class="game"></div>
+  <div class="roomList">
+    <ul>
+    </ul>
+  </div>
+
+  <!-- build:remove -->
+  <script src="http://localhost:35729/livereload.js"></script>
+  <!-- /build -->
+
+  <!-- build:js phaser.min.js -->
+  <script src="src/zepto.min.js"></script>
+  <script src="node_modules/phaser/build/phaser.min.js"></script>
+  <script src="src/VirtualJoystick.js"></script>
+
+
+  <!-- /build -->
+  <script src="https://cdn.wilddog.com/sdk/js/2.5.8/wilddog.js"></script>
+  <!-- build:js bundle.min.js -->
+
+  <script src="bundle.js"></script>
+  <!-- /build -->
+
+</body>
+</html>

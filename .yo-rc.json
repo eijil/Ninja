@@ -1,0 +1,7 @@
+{
+  "generator-phaser": {
+    "projectName": "Ninja",
+    "esVersion": 6,
+    "gameFolder": "game"
+  }
+}
