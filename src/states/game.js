@@ -32,7 +32,7 @@ class Game extends Phaser.State {
     }
     // this.currentPlayerRef = this.ref.child(this.game.player);
     // this.oterhPlayRef = this.ref.child(this.otherPlayer);
-    
+
   }
 
   create() {
@@ -40,10 +40,9 @@ class Game extends Phaser.State {
     this.ground = this.game.add.tileSprite(0, this.game.height - 40, this.game.width, 40, 'ground');
     this.ground.body.collideWorldBounds = true;
     this.stage.backgroundColor = '#124184';
-    this.player1 = new Player(this.game,100,this.world.height - 80,this.game.player);
+    this.player1 = new Player(this.game,100,this.game.world.centerY,this.game.player);
     this.game.add.existing(this.player1);
     this.createJoystick();
-
 
     //this.server();
   }
@@ -110,33 +109,42 @@ class Game extends Phaser.State {
     let _this = this;
     let x = 100,
         y = this.world.height - 100;
-    this.stick = this.game.plugins.add(Phaser.Plugin.VirtualJoystick);
-    this.stick.init(x,y,100,80);
-    this.stick.start();
-    this.stick.onStartDrag = function(){
-      _this.player1.animations.play('run');
+    // this.stick = this.game.plugins.add(Phaser.Plugin.VirtualJoystick);
+    // this.stick.init(x,y,100,80);
+    // this.stick.start();
+    // this.stick.onStartDrag = function(){
+    //   _this.player1.animations.play('run');
 
-    }
-    this.stick.onMove = function(){
-      if(Math.abs(this.angle) < 90 && Math.abs(this.angle)!= 0){
-        _this.player1.scale.setTo(1,1);
-        _this.action = 'r-run';
-        _this.player1.stickDirect = 'right';
+    // }
+    // this.stick.onMove = function(){
+    //   if(Math.abs(this.angle) < 90 && Math.abs(this.angle)!= 0){
+    //     _this.player1.scale.setTo(1,1);
+    //     _this.action = 'r-run';
+    //     _this.player1.stickDirect = 'right';
 
-      }
-      if(Math.abs(this.angle) > 90 && Math.abs(this.angle)!= 0){
-        _this.player1.scale.setTo(-1,1);
-        _this.action = 'l-run';
-        _this.player1.stickDirect = 'left';
-      }
+    //   }
+    //   if(Math.abs(this.angle) > 90 && Math.abs(this.angle)!= 0){
+    //     _this.player1.scale.setTo(-1,1);
+    //     _this.action = 'l-run';
+    //     _this.player1.stickDirect = 'left';
+    //   }
 
-      _this.player1.stickAngle = this.angle;
+    //   _this.player1.stickAngle = this.angle;
 
-    }
+    // }
+
+    this.gamepad = this.game.plugins.add(Phaser.Plugin.VirtualGamepad);
+    this.joystick = this.gamepad.addJoystick(100, this.game.height-200, 1.1, 'gamepad');
+    // Add a button to the game (only one is allowed right now)
+    this.button = this.gamepad.addButton(this.game.width - 150, this.game.height - 200, 1.0, 'buttonJump');
+
+
+
+
 
     //
     //this.fireButton = this.game.add.button(this.game.width - 200,this.game.height - 200,'buttonFire',this.player1.fire,this);
-    this.fireButton = this.game.add.button(this.game.width - 200,this.game.height - 200,'buttonFire',this.player1.fire,this.player1);
+    this.fireButton = this.game.add.button(this.game.width - 100,this.game.height - 150,'buttonFire',this.player1.fire,this.player1);
   }
   createJump(){
     this.jumpButton = this.game.add.button(500, 400, 'jump', this.jump, this);
@@ -155,16 +163,34 @@ class Game extends Phaser.State {
 
     var _this = this;
 
-    // if(this.stick.force == 0){
-    //   this.player1.animations.play('idle');
+    this.game.physics.arcade.collide(_this.player1, _this.ground);
+    // this.player1.x += this.stick.force * 3 * this.stick.deltaX;
+    // if(this.player2 && this.playerData){
+    //   this.player2.x += this.playerData.x;
     // }
-    this.player1.x += this.stick.force * 3 * this.stick.deltaX;
-    if(this.player2 && this.playerData){
-      this.player2.x += this.playerData.x;
+    //console.log(this.joystick.properties.deltaX);
+
+    if(this.joystick.properties.inUse){
+
+      this.player1.animations.play('run');
+      this.player1.stickAngle = this.joystick.properties.angle;
+      this.player1.x +=  this.joystick.properties.deltaX * 3;
+
+      //right
+      if(this.joystick.properties.right == true && this.player1.stickDirect != 'right'){
+        this.player1.stickDirect = 'right';
+        this.player1.scale.x = 1;
+      }
+      //left
+      if(this.joystick.properties.left == true && this.player1.stickDirect != 'left'){
+        this.player1.stickDirect = 'left';
+        this.player1.scale.x = -1;
+      }
+    }else{
+      this.player1.stickAngle = 0;
+
     }
-
-
-
+    //
     //_this.uploadPlayerPos();
   }
   //更新当前玩家位置信息
@@ -196,7 +222,7 @@ class Game extends Phaser.State {
 
   }
   render(){
-
+    //this.game.debug.bodyInfo(this.ground, 16, 24);
   }
 
   endGame() {

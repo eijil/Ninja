@@ -22,8 +22,13 @@ class Preloader extends Phaser.State {
     this.load.atlasJSONHash('player1', 'assets/boy.png', 'assets/boy.json');
     this.load.atlasJSONHash('player2', 'assets/girl.png', 'assets/girl.json');
 
-    this.load.image('buttonFire','assets/flatLight/flatLight47.png');
-    //this.load.atlas('arcade', 'assets/virtualjoystick/skins/arcade-joystick.png', 'assets/virtualjoystick/skins/arcade-joystick.json');
+    this.load.image('buttonFire','assets/transparentDark/transparentDark47.png');
+    
+    this.load.spritesheet('gamepad', 
+            'assets/gamepad/gamepad_spritesheet.png', 100, 100);
+    this.load.image('buttonJump','assets/transparentDark/transparentDark43.png');
+    this.load.image('buttonFire','assets/transparentDark/transparentDark05.png');
+    
 
   }
 

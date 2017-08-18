@@ -34,6 +34,8 @@ Phaser.Plugin.VirtualJoystick = function (game, parent) {
     this.onMove = null;
     this.onStartDrag = null;
 
+    
+
 };
 
 Phaser.Plugin.VirtualJoystick.prototype = Object.create(Phaser.Plugin.prototype);
@@ -132,7 +134,7 @@ Phaser.Plugin.VirtualJoystick.prototype.stop = function () {
     // this.game.stage.removeChild(this.base);
     // this.game.stage.removeChild(this.nub);
 
-    // this.game.input.deleteMoveCallback(this.callbackID);
+    //this.game.input.deleteMoveCallback(this.callbackID);
 
 };
 
