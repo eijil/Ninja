@@ -4,104 +4,90 @@ class Game extends Phaser.State {
 
   constructor() {
     super();
-    this.isJump = false;
     this.ground;
+    //当前玩家
     this.player1 = null;
+    //其它玩家
     this.player2 = null;
     this.gameStart = false;
     this.synced = true;
-    this.action = '';
     this.playerData;
   }
   init  () {
 
     this.physics.startSystem(Phaser.Physics.ARCADE);
-    this.game.world.enableBody = true;
-    this.game.physics.arcade.gravity.y = 600;
+    //this.game.world.enableBody = true;
+    this.game.physics.arcade.gravity.y = 400;
 
-    this.game.player = 'player1';
-    this.game.roomdID = '000000';
+    if(!this.game.roomID){
+      console.log('error')
+      return;
+    }
 
     // console.log(this.currentPlayer);
     this.otherPlayer = this.game.player == 'player1' ? 'player2' : 'player1';
+    this.ref = wilddog.sync().ref(this.game.roomID);
 
-
-    //this.ref = wilddog.sync().ref(this.game.roomID);
-    if(this.game.player == ''){
-      console.log('error');
-    }
-    // this.currentPlayerRef = this.ref.child(this.game.player);
-    // this.oterhPlayRef = this.ref.child(this.otherPlayer);
+    //监听
+    this.currentPlayerRef = this.ref.child(this.game.player);
+    this.oterhPlayRef = this.ref.child(this.otherPlayer);
 
   }
 
   create() {
 
-    this.ground = this.game.add.tileSprite(0, this.game.height - 40, this.game.width, 40, 'ground');
-    this.ground.body.collideWorldBounds = true;
+    //this.ground = this.game.add.tileSprite(0, this.game.height - 40, this.game.width, 40, 'ground');
+    //this.game.physics.arcade.enableBody(this.ground);
+    //this.ground.body.collideWorldBounds = true;
     this.stage.backgroundColor = '#124184';
     this.player1 = new Player(this.game,100,this.game.world.centerY,this.game.player);
+
     this.game.add.existing(this.player1);
+    this.waitText = this.add.text(this.game.world.centerX-20,10,"等待其它玩家加入..",{fill:'#ffffff','font':'16px'});
     this.createJoystick();
-
-    //this.server();
-  }
-
-  server(){
-    var _this = this;
     this.updateOtherPlayer();
   }
+
 
   updateOtherPlayer(){
     var _this = this;
     this.oterhPlayRef.on('value',function(snap){
-        console.log(snap.val());
-        // console.log(_this.gameStart);
+
         if(snap.val() !=null){
           if(!_this.gameStart)
-            _this.player2 = _this.createPlayer(_this.otherPlayer);
+            _this.player2 = new Player(_this.game,100,_this.game.world.centerY,_this.otherPlayer);
+            _this.game.add.existing(_this.player2);
             _this.gameStart = true;
           }
           //updatePos
           var pos = snap.child('pos').val();
           var action = snap.child('action').val();
+          var direct = snap.child('direct').val();
+          var state = snap.child('state').val();
           if(pos != null){
             _this.playerData = pos;
-
           }
-          if(action !=null){
-            switch (action) {
-              case 'r-run':
-                _this.player2.animations.play('run');
-                _this.player2.scale.setTo(1,1);
-                break;
-              case 'l-run':
-                _this.player2.animations.play('run');
-                _this.player2.scale.setTo(-1,1);
-                break;
-              default:
-                _this.player2.animations.play('idle');
+          if(direct!=null){
+             _this.player2.stickDirect = direct;
+            if(direct == 'left'){
+              _this.player2.scale.x = -1;
+            }else{
+              _this.player2.scale.x = 1;
+            }
+          }
+          if(state){
+            _this.player2.action = action;
+            _this.player2.isRun  = state.isRun;
+            if(state.isFire){
+              _this.player2.fire();
+            }
+            
+            if(action == 'jump'){
+              _this.player2.jump();
             }
           }
 
     })
-  }
-
-  createPlayer(key){
-
-    var player;
-    var x = 100;
-    var y = this.world.height - 80;
-    if(key == 'player2'){
-      x = 800;
-    }
-    player  = this.add.sprite(x,y,key);
-    //player.height = 50;
-    player.body.collideWorldBounds = true;
-    player.animations.add('idle', Phaser.Animation.generateFrameNames('idle/', 1, 10, '', 4), 10, true, false);
-    player.animations.add('run', Phaser.Animation.generateFrameNames('run/', 1, 10, '', 4), 10, true, false);
-
-    return player;
   }
 
   //摇杆
@@ -109,72 +95,35 @@ class Game extends Phaser.State {
     let _this = this;
     let x = 100,
         y = this.world.height - 100;
-    // this.stick = this.game.plugins.add(Phaser.Plugin.VirtualJoystick);
-    // this.stick.init(x,y,100,80);
-    // this.stick.start();
-    // this.stick.onStartDrag = function(){
-    //   _this.player1.animations.play('run');
-
-    // }
-    // this.stick.onMove = function(){
-    //   if(Math.abs(this.angle) < 90 && Math.abs(this.angle)!= 0){
-    //     _this.player1.scale.setTo(1,1);
-    //     _this.action = 'r-run';
-    //     _this.player1.stickDirect = 'right';
-
-    //   }
-    //   if(Math.abs(this.angle) > 90 && Math.abs(this.angle)!= 0){
-    //     _this.player1.scale.setTo(-1,1);
-    //     _this.action = 'l-run';
-    //     _this.player1.stickDirect = 'left';
-    //   }
-
-    //   _this.player1.stickAngle = this.angle;
-
-    // }
 
     this.gamepad = this.game.plugins.add(Phaser.Plugin.VirtualGamepad);
     this.joystick = this.gamepad.addJoystick(100, this.game.height-200, 1.1, 'gamepad');
-    // Add a button to the game (only one is allowed right now)
-    this.button = this.gamepad.addButton(this.game.width - 150, this.game.height - 200, 1.0, 'buttonJump');
 
 
-
-
-
-    //
-    //this.fireButton = this.game.add.button(this.game.width - 200,this.game.height - 200,'buttonFire',this.player1.fire,this);
     this.fireButton = this.game.add.button(this.game.width - 100,this.game.height - 150,'buttonFire',this.player1.fire,this.player1);
+    this.jumpButton = this.gamepad.addButton(this.game.width - 150, this.game.height - 200, 1.0, 'buttonJump');
+    this.jumpButton.onInputDown.add(this.player1.jump,this.player1);
   }
-  createJump(){
-    this.jumpButton = this.game.add.button(500, 400, 'jump', this.jump, this);
-    this.jumpButton.width = 50;
-    this.jumpButton.height = 50;
-  }
-  fire(){
 
-  }
-  jump(){
-    this.isJump = true;
-    var jumptween = this.game.add.tween(this.player1).to( { y: "-" + 100 }, 1000, "Linear", true);
 
-  }
   update() {
 
     var _this = this;
+    //this.game.physics.arcade.collide(_this.player1, _this.ground);
 
-    this.game.physics.arcade.collide(_this.player1, _this.ground);
-    // this.player1.x += this.stick.force * 3 * this.stick.deltaX;
-    // if(this.player2 && this.playerData){
-    //   this.player2.x += this.playerData.x;
-    // }
+    //跟新玩家2位置
+    if(this.player2 && this.playerData){
+      this.player2.x += this.playerData.x;
+      // this.player2.y = this.playerData.y;
+    }
     //console.log(this.joystick.properties.deltaX);
 
     if(this.joystick.properties.inUse){
 
-      this.player1.animations.play('run');
+
+      this.player1.isRun = true;
       this.player1.stickAngle = this.joystick.properties.angle;
-      this.player1.x +=  this.joystick.properties.deltaX * 3;
+      this.player1.body.velocity.x = this.joystick.properties.deltaX * this.player1.speed;
 
       //right
       if(this.joystick.properties.right == true && this.player1.stickDirect != 'right'){
@@ -187,42 +136,54 @@ class Game extends Phaser.State {
         this.player1.scale.x = -1;
       }
     }else{
+      this.joystick.properties.deltaX = 0;
       this.player1.stickAngle = 0;
+      this.player1.body.velocity.x = 0;
+      this.player1.isRun = false;
 
     }
     //
-    //_this.uploadPlayerPos();
+    if(this.gameStart){
+      this.waitText.visible = false;
+    }
+
+    //
+    this.uploadPlayerInfo();
   }
-  //更新当前玩家位置信息
-  uploadPlayerPos(){
+
+  //上传信息到服务器
+  uploadPlayerInfo(){
     var _this = this;
     if(this.synced){
+
         this.synced = false;
         this.currentPlayerRef.update({
           "pos":{
-            "x":_this.stick.force * 3 * _this.stick.deltaX,
+            "x":_this.joystick.properties.deltaX * 3,
             "y":_this.player1.body.y
           },
-          "action":_this.action
+          "direct":_this.player1.stickDirect,
+          "action":_this.player1.action,
+          "state":{
+            "isFire" : _this.player1.isFire,
+            "isRun"  : _this.player1.isRun,
+            "isJump" : _this.player1.isJump
+          }
         },function(){
           _this.synced = true;
+
         })
     }
   }
-  //获取对战玩家的位置
-  updatePlayerPos(){
-    //this.player1
-  }
 
-  jumpPlayer(){
 
-  }
   onDisconnect(){
 
 
   }
   render(){
-    //this.game.debug.bodyInfo(this.ground, 16, 24);
+    // this.game.debug.bodyInfo(this.player1,32,32);
+    // this.game.debug.body(this.player1);
   }
 
   endGame() {

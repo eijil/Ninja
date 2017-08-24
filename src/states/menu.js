@@ -14,9 +14,9 @@ class Menu extends Phaser.State {
         this.game.player = '';
         this.ref = wilddog.sync().ref();
 
-        // this.roomList();
-        // this.JoinRoom();
-        this.game.state.start('game');
+        this.roomList();
+        this.JoinRoom();
+        // this.game.state.start('game');
         window.clearRoom = function(){
           wilddog.sync().ref().set({
             "00000":""
@@ -38,12 +38,8 @@ class Menu extends Phaser.State {
             snapshot.forEach(function(data) {
                 var roomID = data.key();
                 var playerNum = data.numChildren();
-                htmlList += `<li id="${roomID}">
-                               <div>room: ${roomID}</div>
-                               <div>player: ${playerNum}/2</div>
-                            </li>`;
+                $('.playerNum','#'+roomID).text(playerNum);
             })
-            $(".roomList ul").html(htmlList);
             _this.$roomList.show();
         })
 
