@@ -10,15 +10,12 @@ class Boot extends Phaser.State {
 
   create() {
 
-    this.game.scale.pageAlignHorizontally = true;
+    //this.game.scale.pageAlignHorizontally = true;
 
     //setup device scaling
     if (!this.game.device.desktop) {
       this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-      // this.game.scale.maxWidth = 750;
-      // this.game.scale.maxHeight = 1206;
       this.game.scale.forceOrientation(true);
-
     }
     this.initWilddog();
     this.game.state.start('preloader');
