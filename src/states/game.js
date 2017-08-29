@@ -11,7 +11,9 @@ class Game extends Phaser.State {
     this.player2 = null;
     this.gameStart = false;
     this.synced = true;
-    this.playerData;
+    this.playerX = 0;
+    this.uploadTime;
+    this.ping;
   }
   init  () {
 
@@ -66,12 +68,16 @@ class Game extends Phaser.State {
             _this.gameStart = true;
           }
           //updatePos
-          var pos = snap.child('pos').val();
+          var posx = snap.child('x').val();
+          var angle = snap.child('angle').val();
           var action = snap.child('action').val();
           var direct = snap.child('direct').val();
           var state = snap.child('state').val();
-          if(pos != null){
-            _this.playerData = pos;
+          if(posx != null){
+            _this.playerX = posx;
+          }
+          if(angle != null){
+            _this.player2.stickAngle = angle;
           }
           if(direct!=null){
              _this.player2.stickDirect = direct;
@@ -81,6 +87,7 @@ class Game extends Phaser.State {
               _this.player2.scale.x = 1;
             }
           }
+          
           if(state){
             _this.player2.isRun  = state.isRun;
             _this.player2.isFire = state.isFire;
@@ -126,8 +133,9 @@ class Game extends Phaser.State {
     //this.game.physics.arcade.collide(_this.player1, _this.ground);
 
     //跟新玩家2位置
-    if(this.player2 && this.playerData){
-      this.player2.x += this.playerData.x;
+    if(this.player2 ){
+      console.log(this.playerX)
+      this.player2.body.velocity.x = this.playerX;
       // this.player2.y = this.playerData.y;
     }
     //console.log(this.joystick.properties.deltaX);
@@ -173,14 +181,13 @@ class Game extends Phaser.State {
   //上传信息到服务器
   uploadPlayerInfo(){
     var _this = this;
-    if(this.synced){
 
+    if(this.synced){
         this.synced = false;
+        this.uploadTime = this.game.time.now;
         this.currentPlayerRef.update({
-          "pos":{
-            "x":_this.joystick.properties.deltaX * 3,
-            "y":_this.player1.body.y
-          },
+          "x" : _this.joystick.properties.deltaX * _this.player1.speed,
+          "angle": _this.player1.stickAngle,
           "direct":_this.player1.stickDirect,
           "action":_this.player1.action,
           "state":{
@@ -190,7 +197,7 @@ class Game extends Phaser.State {
           }
         },function(){
           _this.synced = true;
-
+          _this.ping = _this.game.time.now - _this.uploadTime;
         })
     }
   }
@@ -204,6 +211,7 @@ class Game extends Phaser.State {
   render(){
     // this.game.debug.bodyInfo(this.player1,32,32);
     //this.game.debug.body(this.player1);
+    this.game.debug.text('ping:'+this.ping+'ms',32,32);
   }
 
   endGame() {

@@ -38,7 +38,7 @@ class Player extends Phaser.Sprite {
         }
 
         this.setAnimations();
-
+        //子弹
         this.weapon = this.game.add.weapon(10, 'kunai');
         this.weapon.trackSprite(this, 10, 10);
         this.weapon.bulletSpeed = 400;
@@ -117,7 +117,7 @@ class Player extends Phaser.Sprite {
 
     update() {
 
-        if (this.isRun && this.action != 'run' && !this.isJump) {
+        if (this.isRun && this.action != 'run' && this.action != 'fire' && !this.isJump ) {
             this.isFire = false;
             this.animations.play('run');
             this.action = 'run';
